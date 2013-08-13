@@ -1,0 +1,5 @@
+Module: opm-build
+Description: Build system for Open Porous Media Initiative modules
+Version: 1.0
+Label: 2013.03
+Depends:
