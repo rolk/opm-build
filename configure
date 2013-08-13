@@ -1,0 +1,51 @@
+#!/bin/sh
+# this file is supposed to be located in the source directory
+src_dir=$(dirname $0)
+
+# supposedly called in the directory that will receive build files
+bld_dir=$(pwd)
+
+# default is to install locally on the system (packages override this)
+prefix=/usr/local
+
+# scan the arguments for an explicit --with-opm or --with-opm-build
+mod_dir=
+for OPT in "$@"; do
+    case "$OPT" in
+        --with-opm-build=*)
+            # remove everything after
+            mod_dir=${OPT#*=}
+            ;;
+        --with-opm=*)
+            mod_dir=${OPT#*=}/opm-build
+            ;;
+        --prefix=*)
+            prefix=${OPT#*=}
+            ;;
+    esac
+done
+
+# if it isn't specified, the look around in other known places
+conf_file=cmake/Scripts/configure
+if [ -z "$mod_dir" ]; then
+    if [ -r "$src_dir/$conf_file" ]; then
+        mod_dir="$src_dir"
+    elif [ -r "$src_dir/../opm-build/$conf_file" ]; then
+        mod_dir="$src_dir/../opm-build"
+    elif [ -r "$bld_dir/../opm-build/$conf_file" ]; then
+        mod_dir="$bld_dir/../opm-build"
+    elif [ -r "$bld_dir/../../opm-build/$conf_file" ]; then
+        mod_dir="$bld_dir/../../opm-build/$conf_file"
+    elif [ -r "$prefix/share/opm/$conf_file" ]; then
+        mod_dir="$prefix/share/opm"
+    fi
+fi
+
+# bail out if still not found
+if [ ! -r "$mod_dir/$conf_file" ]; then
+    echo Build macros not located, use --with-opm-build= to specify! 1>&2
+    exit 1
+fi
+
+# forward to the corresponding script in the cmake/Scripts/ directory
+exec $mod_dir/$conf_file --src-dir="$src_dir" "$@"
