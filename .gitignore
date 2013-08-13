@@ -1,0 +1,11 @@
+# editor backup files
+*~
+.\#*
+\#*\#
+.\#*\#
+
+# in-tree build with CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
